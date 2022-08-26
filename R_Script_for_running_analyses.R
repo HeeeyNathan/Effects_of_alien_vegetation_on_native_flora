@@ -1,8 +1,28 @@
+### Read in data
 veg_comm <- read.csv("Laurynas_vegetation_data.csv", h = T, sep = ",", row.names = c(1) ,stringsAsFactors = FALSE)
 
-plot(veg_comm$year, veg_comm$Linaria_loeselii_rare)
-plot(veg_comm$Alien_sp_comb_. ~ veg_comm$native_sp_comb_.)
-plot(veg_comm$Linaria_loeselii_rare ~ veg_comm$native_sp_comb_.)
+### Check data distribution
+library(psych)
+library(rcompanion)
+
+#Test bitoic data for normality - ORIGINAL DATA USED
+#Tabund
+boxplot(veg_comm$Linaria_loeselii_rare)
+boxplot(veg_comm$Linaria_loeselii_rare ~ veg_comm$year)
+plotNormalHistogram(veg_comm$Linaria_loeselii_rare)
+plotNormalDensity(veg_comm$Linaria_loeselii_rare)
+qqnorm(veg_comm$Linaria_loeselii_rare, ylab = "Sample Quantiles for Linaria loeselii")
+qqline(veg_comm$Linaria_loeselii_rare, col = "red")
+shapiro.test(veg_comm$Linaria_loeselii_rare) # data are highly skewed
+
+source("HighstatLibV10.R") # pair plots as per Zuur et al. (2018)
+# Check env data for collinearity
+pairs(veg_comm[ , c(7, 5, 36:39)], lower.panel = panel.smooth, upper.panel = panel.cor, 
+      diag.panel = panel.hist, main = "Pearson Correlation Matrix")
+# Check for big correlations
+Corrs <- cor(veg_comm[ , c(7, 5, 36:39)], method = "spearman")
+BigCorrs <- which(Corrs > 0.7 & Corrs < 1, arr.ind = TRUE)
+# pairs(ger_env_sel[ , unique(rownames(ger_BigCorrs))], lower.panel = panel.smooth, upper.panel = panel.cor, diag.panel = panel.hist, main = "Pearson Correlation Matrix")
 
 # Basic linear model (regression)
 lm1 <- lm(Linaria_loeselii_rare ~ 
